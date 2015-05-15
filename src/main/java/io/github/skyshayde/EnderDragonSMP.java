@@ -25,7 +25,8 @@
 package io.github.skyshayde;
 
 import com.google.inject.Inject;
-import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.entity.living.complex.EnderDragon;
@@ -34,6 +35,9 @@ import org.spongepowered.api.event.Subscribe;
 import org.spongepowered.api.event.entity.living.LivingDeathEvent;
 import org.spongepowered.api.event.state.ServerStartedEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.service.config.DefaultConfig;
+
+import java.io.File;
 
 /**
  * Created by Skyshayde.
@@ -42,12 +46,16 @@ import org.spongepowered.api.plugin.Plugin;
 
 @Plugin(id = "enderdragonsmp", name = "EnderDragonSMP", version = "0.1.0")
 public class EnderDragonSMP {
+    static Game game;
     ConfigManager ConfigManager = new ConfigManager(this);
-
-
+    @Inject
+    @DefaultConfig(sharedRoot = true)
+    private File defaultConfig;
+    @Inject
+    @DefaultConfig(sharedRoot = true)
+    private ConfigurationLoader<CommentedConfigurationNode> configManager;
     @Inject
     private Logger logger;
-    static Game game;
 
     public Logger getLogger() {
         return logger;
@@ -55,7 +63,8 @@ public class EnderDragonSMP {
 
     @Subscribe
     public void onServerStart(ServerStartedEvent event) {
-        ConfigurationNode config = ConfigManager.loadConfig(this);
+        getLogger().info("Hello");
+        ConfigManager.loadConfig(defaultConfig, configManager);
     }
 
     @Subscribe

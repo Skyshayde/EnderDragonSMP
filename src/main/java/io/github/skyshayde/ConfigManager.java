@@ -24,11 +24,9 @@
 
 package io.github.skyshayde;
 
-import com.google.inject.Inject;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-import org.spongepowered.api.service.config.DefaultConfig;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,30 +36,29 @@ import java.io.IOException;
  * skyshayde.github.io
  */
 public class ConfigManager {
-    private final EnderDragonSMP plugin;
+    public static int XP_DISTRIBUTION = 0;
+    public static int EGG_DISTRIBUTION = 0;
 
-    public int XP_DISTRIBUTION = 0;
     // 0 for original
     // 1 to split evenly between all players who took part
     // 2 to split based on damage dealt.  If you dealt 15% of the damage, you get 15% of the XP
-    public int EGG_DISTRIBUTION = 0;
-    // 0 for original
+    public static boolean GENERATE_PORTAL = true;
+
+    // 0 for original.  No egg will be created if portal is disabled.
     // 1 to spawn egg entity where dragon died
     // 2 to directly give it to player who dealt most damage
     // 3 to give it to a random player who took part
     // 4 to give one to everyone
-    @Inject
-    @DefaultConfig(sharedRoot = true)
-    private File defaultConfig;
+    private final EnderDragonSMP plugin;
 
-    @Inject
-    @DefaultConfig(sharedRoot = true)
-    private ConfigurationLoader<CommentedConfigurationNode> configManager;
+    // true to create portal
+    // false to disable portal creation
+
     public ConfigManager(EnderDragonSMP plugin) {
         this.plugin = plugin;
     }
 
-    public ConfigurationNode loadConfig(EnderDragonSMP main) {
+    public ConfigurationNode loadConfig(File defaultConfig, ConfigurationLoader<CommentedConfigurationNode> configManager) {
         try {
             if (!defaultConfig.exists()) {
                 defaultConfig.createNewFile();
@@ -69,9 +66,32 @@ public class ConfigManager {
 
                 config.getNode("XP_Distribution").setValue(0);
                 config.getNode("Egg_Distribution").setValue(0);
+                config.getNode("Generate Portal on death?").setValue(true);
                 configManager.save(config);
             }
             ConfigurationNode config = configManager.load();
+            ConfigurationNode xp_node = config.getNode("XP_Distribution");
+            ConfigurationNode egg_node = config.getNode("Egg_Distribution");
+            ConfigurationNode portal_node = config.getNode("Generate_Portal_on_Death?");
+
+            if (xp_node.getValue() == null) {
+                plugin.getLogger().warn("XP_Distribution node doesn't exist and was created.  ");
+                xp_node.setValue(0);
+            }
+            if (egg_node.getValue() == null) {
+                plugin.getLogger().warn("Egg_Distribution node doesn't exist and was created.  ");
+                egg_node.setValue(0);
+            }
+
+            if (portal_node.getValue() == null) {
+                plugin.getLogger().warn("Generate Portal on Death? node doesn't exist and was created.  ");
+                portal_node.setValue(true);
+            }
+            plugin.getLogger().info(config.getNode("Test").getString());
+
+            XP_DISTRIBUTION = config.getNode("XP_Distribution").getInt();
+            EGG_DISTRIBUTION = config.getNode("Egg_Distribution").getInt();
+            GENERATE_PORTAL = config.getNode("Generate Portal on death?").getBoolean();
 
             return config;
 
