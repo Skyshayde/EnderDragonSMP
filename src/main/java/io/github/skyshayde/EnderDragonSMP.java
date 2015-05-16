@@ -33,6 +33,7 @@ import org.spongepowered.api.entity.living.complex.EnderDragon;
 import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.event.Subscribe;
 import org.spongepowered.api.event.entity.living.LivingDeathEvent;
+import org.spongepowered.api.event.state.PreInitializationEvent;
 import org.spongepowered.api.event.state.ServerStartedEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.config.DefaultConfig;
@@ -47,13 +48,17 @@ import java.io.File;
 @Plugin(id = "enderdragonsmp", name = "EnderDragonSMP", version = "0.1.0")
 public class EnderDragonSMP {
     static Game game;
+
     ConfigManager ConfigManager = new ConfigManager(this);
+
     @Inject
     @DefaultConfig(sharedRoot = true)
     private File defaultConfig;
+
     @Inject
     @DefaultConfig(sharedRoot = true)
     private ConfigurationLoader<CommentedConfigurationNode> configManager;
+
     @Inject
     private Logger logger;
 
@@ -62,9 +67,13 @@ public class EnderDragonSMP {
     }
 
     @Subscribe
-    public void onServerStart(ServerStartedEvent event) {
-        getLogger().info("Hello");
+    public void onPreInitialization(PreInitializationEvent event) {
         ConfigManager.loadConfig(defaultConfig, configManager);
+
+    }
+
+    @Subscribe
+    public void onServerStart(ServerStartedEvent event) {
     }
 
     @Subscribe
